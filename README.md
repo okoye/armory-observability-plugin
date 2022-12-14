@@ -1,8 +1,8 @@
 # Armory Observability Plugin
 
-[![CI](https://github.com/okoye/armory-observability-plugin/actions/workflows/build.yml/badge.svg)](https://github.com/okoye/armory-observability-plugin/actions/workflows/build.yml)
+[![CI](https://github.com/okoye/observability-plugin/actions/workflows/build.yml/badge.svg)](https://github.com/okoye/observability-plugin/actions/workflows/build.yml)
 [![][release img]][release]
-[![CodeQL](https://github.com/okoye/armory-observability-plugin/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/okoye/armory-observability-plugin/actions/workflows/codeql-analysis.yml)
+[![CodeQL](https://github.com/okoye/observability-plugin/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/okoye/observability-plugin/actions/workflows/codeql-analysis.yml)
 [![][license img]][license]
 
 Spinnaker plugin for configuring and customizing observability.
