@@ -50,8 +50,8 @@ public class PrometheusScrapeEndpoint {
   // If you use produces = TextFormat.CONTENT_TYPE_004, for some reason the accept header is ignored
   // and a 406 is returned :/
   // So we will use ResponseEntity<String> and set the content type manually.
-  @ReadOperation()
-  public ResponseEntity<String> scrape() {
+  @ReadOperation
+  public String scrape() {
     try {
       Writer writer = new StringWriter();
       Enumeration<Collector.MetricFamilySamples> samples =
@@ -62,7 +62,7 @@ public class PrometheusScrapeEndpoint {
       responseHeaders.set("Content-Type", TextFormat.CONTENT_TYPE_004);
       TextFormat.write004(writer, samples);
 
-      return new ResponseEntity<>(writer.toString(), responseHeaders, HttpStatus.OK);
+      return writer.toString();
     } catch (IOException ex) {
       // This actually never happens since StringWriter::write() doesn't throw any
       // IOException
