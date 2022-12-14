@@ -51,7 +51,7 @@ public class PrometheusScrapeEndpoint {
   // and a 406 is returned :/
   // So we will use ResponseEntity<String> and set the content type manually.
   @ReadOperation
-  public String scrape() {
+  public ResponseEntity<String> scrape() {
     try {
       Writer writer = new StringWriter();
       Enumeration<Collector.MetricFamilySamples> samples =
@@ -62,7 +62,7 @@ public class PrometheusScrapeEndpoint {
       responseHeaders.set("Content-Type", TextFormat.CONTENT_TYPE_004);
       TextFormat.write004(writer, samples);
 
-      return writer.toString();
+      return ResponseEntity.ok(writer.toString());
     } catch (IOException ex) {
       // This actually never happens since StringWriter::write() doesn't throw any
       // IOException
