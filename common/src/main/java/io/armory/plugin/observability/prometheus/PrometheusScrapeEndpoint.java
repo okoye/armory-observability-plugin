@@ -42,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 public class PrometheusScrapeEndpoint {
 
   private final CollectorRegistry collectorRegistry;
+  private final String PROMETHEUS_CONTENT_TYPE = "text/plain;version=0.0.4";
 
   public PrometheusScrapeEndpoint(CollectorRegistry collectorRegistry) {
     this.collectorRegistry = collectorRegistry;
@@ -50,7 +51,7 @@ public class PrometheusScrapeEndpoint {
   // If you use produces = TextFormat.CONTENT_TYPE_004, for some reason the accept header is ignored
   // and a 406 is returned :/
   // So we will use ResponseEntity<String> and set the content type manually.
-  @ReadOperation
+  @ReadOperation(produces = PROMETHEUS_CONTENT_TYPE)
   public ResponseEntity<String> scrape() {
     try {
       Writer writer = new StringWriter();
@@ -62,7 +63,7 @@ public class PrometheusScrapeEndpoint {
       responseHeaders.set("Content-Type", TextFormat.CONTENT_TYPE_004);
       TextFormat.write004(writer, samples);
 
-      return ResponseEntity.ok(writer.toString());
+      return new ResponseEntity<String>(writer.toString(), responseHeaders, HttpStatus.OK);
     } catch (IOException ex) {
       // This actually never happens since StringWriter::write() doesn't throw any
       // IOException
