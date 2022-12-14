@@ -27,8 +27,7 @@ jobs:
       - name: get project info
         id: get_project_info
         run: |
-          echo ::set-output name=PROJECT::$(basename `pwd`)
-          echo ::set-output name=PROJECT_KEBAB::$(basename `pwd` | sed 's/\([a-z0-9]\)\([A-Z]\)/\1_\L\2/g')
+          echo ::set-output name=PROJECT::armory-observability-plugin
           echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
       - name: create release
