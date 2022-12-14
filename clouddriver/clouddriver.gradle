@@ -1,0 +1,9 @@
+spinnakerPlugin {
+    serviceName = "clouddriver"
+    pluginClass = "io.armory.plugin.observability.ArmoryObservabilityPlugin"
+    requires = "clouddriver>=${clouddriverMinimumSuppotedVersion}"
+}
+
+dependencies {
+    implementation(project(":common"))
+}

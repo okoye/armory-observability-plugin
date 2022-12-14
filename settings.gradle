@@ -1,0 +1,32 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'armory-observability-plugin'
+
+include(
+    'clouddriver',
+    'common',
+    'echo',
+    'fiat',
+    'front50',
+    'gate',
+    'igor',
+    'kayenta',
+    'orca',
+    'rosco',
+)
+
+def setBuildFile(project) {
+    project.buildFileName = "${project.name}.gradle"
+    project.children.each {
+        setBuildFile(it)
+    }
+}
+
+rootProject.children.each {
+    setBuildFile(it)
+}

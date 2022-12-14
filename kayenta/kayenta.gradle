@@ -1,0 +1,9 @@
+spinnakerPlugin {
+    serviceName = "kayenta"
+    pluginClass = "io.armory.plugin.observability.ArmoryObservabilityPlugin"
+    requires = "kayenta>=${kayentaMinimumSuppotedVersion}"
+}
+
+dependencies {
+    implementation(project(":common"))
+}

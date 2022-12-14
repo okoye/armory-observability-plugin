@@ -1,0 +1,9 @@
+spinnakerPlugin {
+    serviceName = "echo"
+    pluginClass = "io.armory.plugin.observability.ArmoryObservabilityPlugin"
+    requires = "echo>=${echoMinimumSuppotedVersion}"
+}
+
+dependencies {
+    implementation(project(":common"))
+}

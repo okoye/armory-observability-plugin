@@ -1,0 +1,159 @@
+plugins {
+    id("com.palantir.git-version").version("0.12.2")
+    id("io.spinnaker.plugin.bundler").version("$spinnakerGradleVersion")
+    id "com.github.kt3k.coveralls" version "2.9.0"
+    id 'idea'
+}
+
+spinnakerBundle {
+    pluginId = "Armory.ObservabilityPlugin"
+    description = "A plugin for configuring and customizing Micrometer for Armory."
+    provider = "TODO"
+    version = rootProject.version
+}
+
+version = normalizedVersion()
+
+allprojects {
+    apply plugin: 'jacoco'
+
+    repositories {
+        mavenCentral()
+    }
+
+    jacoco {
+        toolVersion = "0.8.5"
+    }
+
+    test {
+        testLogging {
+            events "passed", "skipped", "failed"
+        }
+    }
+}
+
+subprojects { subProject ->
+    apply plugin: 'java'
+    apply plugin: "maven-publish"
+
+    if (!['common'].contains(subProject.name)) {
+        apply plugin: "io.spinnaker.plugin.service-extension"
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+
+    repositories {
+        mavenCentral()
+    }
+
+    compileJava {
+        options.compilerArgs << '-Apf4j.ignoreExtensionPoint'
+    }
+
+    dependencies {
+        compileOnly 'org.projectlombok:lombok:+'
+        annotationProcessor 'org.projectlombok:lombok:+'
+        testCompileOnly 'org.projectlombok:lombok:+'
+        testAnnotationProcessor 'org.projectlombok:lombok:+'
+
+        compileOnly(group: 'org.pf4j', name: 'pf4j', version: "${pf4jVersion}")
+        compileOnly(group: 'io.spinnaker.kork', name: 'kork-plugins-api', version: "${korkVersion}")
+        compileOnly "io.spinnaker.kork:kork-plugins-spring-api:$korkVersion"
+        compileOnly "io.spinnaker.kork:kork-core:${korkVersion}"
+        compileOnly "io.spinnaker.kork:kork-web:${korkVersion}"
+        // Start Prometheus deps
+        implementation("io.micrometer:micrometer-registry-prometheus:1.3.5") {
+            exclude group: 'io.micrometer', module: 'micrometer-core'
+        }
+        implementation group: 'io.prometheus', name: 'simpleclient_common', version: '0.9.0'// needs to match micrometer-registry-prometheus
+        // End Prometheus deps
+
+        // Start New Relic Deps
+        implementation('com.newrelic.telemetry:micrometer-registry-new-relic:0.5.0') {
+            exclude group: 'io.micrometer', module: 'micrometer-core'
+            exclude group: 'org.slf4j', module: 'slf4j-api'
+        }
+        // End New Relic Deps
+        // Start Datadog Deps
+        implementation('io.micrometer:micrometer-registry-datadog:1.9.1') {
+            exclude group: 'io.micrometer', module: 'micrometer-core'
+            exclude group: 'org.slf4j', module: 'slf4j-api'
+        }
+        // End Datadog Deps
+        annotationProcessor(group: 'org.pf4j', name: 'pf4j', version: "${pf4jVersion}")
+
+        testImplementation 'junit:junit:4.12'
+        testImplementation "org.mockito:mockito-core:2.+"
+        testImplementation 'org.springframework:spring-test:5.1.7.RELEASE'
+        testImplementation 'org.springframework.boot:spring-boot-test:2.1.5.RELEASE'
+        testImplementation 'org.springframework.vault:spring-vault-core:2.1.2.RELEASE'
+        testImplementation(group: 'org.pf4j', name: 'pf4j', version: "${pf4jVersion}")
+        testImplementation(group: 'io.spinnaker.kork', name: 'kork-plugins-api', version: "${korkVersion}")
+        testImplementation "io.spinnaker.kork:kork-plugins-spring-api:$korkVersion"
+        testImplementation "io.spinnaker.kork:kork-core:${korkVersion}"
+        testImplementation "io.spinnaker.kork:kork-web:${korkVersion}"
+        testImplementation "org.mock-server:mockserver-client-java:5.10.0"
+        testImplementation "org.mock-server:mockserver-junit-rule:5.10.0"
+        testImplementation "org.testcontainers:testcontainers:1.14.3"
+        testImplementation 'io.rest-assured:rest-assured:4.3.0'
+    }
+
+    group = "io.armory.plugins.metrics"
+    version = rootProject.version
+}
+
+List<String> blackList = []
+def publishedProjects = subprojects.findAll { !blackList.contains(it.path) }
+
+task jacocoMerge(type: JacocoMerge) {
+    publishedProjects.each { subproject ->
+        executionData subproject.tasks.withType(Test)
+    }
+    doFirst {
+        executionData = files(executionData.findAll { it.exists() })
+    }
+}
+
+task aggregatedJacocoReport(type: JacocoReport, group: 'Coverage reports') {
+    description = 'Generates an aggregate report from all subprojects'
+    dependsOn publishedProjects.test, jacocoMerge
+
+    additionalSourceDirs.from = files(publishedProjects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.from = files(publishedProjects.sourceSets.main.allSource.srcDirs)
+    classDirectories.from = files(publishedProjects.sourceSets.main.output)
+    executionData jacocoMerge.destinationFile
+
+    reports {
+        html.enabled = true // human readable
+        xml.enabled = true // required by coveralls
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: 'io/armory/plugin/observability/model/**')
+            fileTree(dir: it, exclude: 'io/micrometer/**')
+        }))
+    }
+}
+
+coveralls {
+    sourceDirs = publishedProjects.sourceSets.main.allSource.srcDirs.flatten()
+    jacocoReportPath = "${buildDir}/reports/jacoco/aggregatedJacocoReport/aggregatedJacocoReport.xml"
+    saveAsFile = true
+    sendToCoveralls = false
+}
+
+String normalizedVersion() {
+    String fullVersion = gitVersion()
+    logger.lifecycle("full version: ${String.valueOf(fullVersion)}")
+    String normalized = fullVersion.split("-").first()
+    def resolvedVersion
+    if (fullVersion.contains("dirty")) {
+        resolvedVersion = "$normalized-SNAPSHOT"
+    } else {
+        resolvedVersion = fullVersion
+    }
+    logger.lifecycle("Resolved version: ${resolvedVersion}")
+    return resolvedVersion
+}
