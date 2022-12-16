@@ -35,7 +35,7 @@ import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
  */
 // If you use WebEndpoint instead of Endpoint, the plugin throws class def not found error with PF4j
 // ¯\_(ツ)_/¯
-@Endpoint(id = "x-prometheus")
+@Endpoint(id = "aop-prometheus")
 public class PrometheusScrapeEndpoint {
 
   private final CollectorRegistry collectorRegistry;
