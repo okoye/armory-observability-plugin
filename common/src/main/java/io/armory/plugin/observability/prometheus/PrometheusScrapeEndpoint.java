@@ -52,6 +52,7 @@ public class PrometheusScrapeEndpoint {
       Enumeration<Collector.MetricFamilySamples> samples =
           this.collectorRegistry.metricFamilySamples();
       TextFormat.write004(writer, samples);
+      TextFormat.write004(writer, samples);
       return writer.toString();
     } catch (IOException ex) {
       // This actually never happens since StringWriter::write() doesn't throw any
