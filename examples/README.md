@@ -27,7 +27,7 @@ spec:
     # "port" is string only. "targetPort" is integer or string.
     - port: http
       interval: 10s
-      path: "/aop-prometheus"
+      path: "/x-prometheus"
 ``` 
 Depending on your configuration modify the path and port or targetPort (when using a targetPort multiple serviceMonitors 
 need to be deployed to scrape the appropriate Spinnaker service port).
@@ -54,7 +54,7 @@ spec:
       "app.kubernetes.io/name": clouddriver
   podMetricsEndpoints:
   - port: "7002"
-    path: /aop-prometheus
+    path: /x-prometheus
 ```
 
 OSS community maintains [spinnaker-mixin](https://github.com/uneeq-oss/spinnaker-mixin) as a collection of Grafana dashboards for the metrics exposed by Armory Observability Plugin. 
