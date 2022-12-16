@@ -79,12 +79,7 @@ public class PrometheusScrapeEndpointFunctionalTest {
     var expectedContent = Files.readString(Path.of(expectedScrapeResource.toURI()));
 
     var responseEntity = sut.scrape();
-    //assertTrue(responseEntity.getStatusCode().is2xxSuccessful());
-    //noinspection ConstantConditions
-//    assertEquals(
-//        "text/plain;version=0.0.4;charset=utf-8",
-//        responseEntity.getHeaders().getContentType().toString());
-//    assertEquals(expectedContent, responseEntity.getBody());
+    assertEquals(expectedContent, responseEntity);
   }
 
   /**
@@ -111,15 +106,14 @@ public class PrometheusScrapeEndpointFunctionalTest {
     registry.counter("foo", tagsWithMissingTag).increment();
     registry.counter("foo", fullCollectionOfTags).increment();
     var responseEntity = sut.scrape();
-//    assertTrue(responseEntity.getStatusCode().is2xxSuccessful());
-//    //noinspection ConstantConditions
-//    assertEquals(
-//        "text/plain;version=0.0.4;charset=utf-8",
-//        responseEntity.getHeaders().getContentType().toString());
-//    // use length since, order is non-deterministic
-//    // Since multiple HELP/TYPE will be removed we are expecting the length to be equal to
-//    // the original - length(chars to be removed)
-//    String duplicate="# HELP foo_total  \n# TYPE foo_total counter ";
-//    assertEquals(expectedContent.length()-duplicate.length(), responseEntity.getBody().length());
+    //noinspection ConstantConditions
+    assertEquals(
+        "text/plain",
+        responseEntity); // Relaxed content restrictions
+    // use length since, order is non-deterministic
+    // Since multiple HELP/TYPE will be removed we are expecting the length to be equal to
+    // the original - length(chars to be removed)
+    String duplicate="# HELP foo_total  \n# TYPE foo_total counter ";
+    assertEquals(expectedContent.length()-duplicate.length(), responseEntity.length());
   }
 }

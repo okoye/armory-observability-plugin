@@ -25,9 +25,6 @@ import java.io.Writer;
 import java.util.Enumeration;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 /**
  * Port of PrometheusScrapeEndpoint but rather than being an web endpoint that won't work with
@@ -38,7 +35,7 @@ import org.springframework.http.ResponseEntity;
  */
 // If you use WebEndpoint instead of Endpoint, the plugin throws class def not found error with PF4j
 // ¯\_(ツ)_/¯
-@Endpoint(id = "aop-prometheus")
+@Endpoint(id = "x-prometheus")
 public class PrometheusScrapeEndpoint {
 
   private final CollectorRegistry collectorRegistry;
@@ -48,9 +45,6 @@ public class PrometheusScrapeEndpoint {
     this.collectorRegistry = collectorRegistry;
   }
 
-  // If you use produces = TextFormat.CONTENT_TYPE_004, for some reason the accept header is ignored
-  // and a 406 is returned :/
-  // So we will use ResponseEntity<String> and set the content type manually.
   @ReadOperation(produces = PROMETHEUS_CONTENT_TYPE)
   public String scrape() {
     try {
@@ -58,11 +52,6 @@ public class PrometheusScrapeEndpoint {
       Enumeration<Collector.MetricFamilySamples> samples =
           this.collectorRegistry.metricFamilySamples();
       TextFormat.write004(writer, samples);
-
-      var responseHeaders = new HttpHeaders();
-      responseHeaders.set("Content-Type", TextFormat.CONTENT_TYPE_004);
-      TextFormat.write004(writer, samples);
-
       return writer.toString();
     } catch (IOException ex) {
       // This actually never happens since StringWriter::write() doesn't throw any

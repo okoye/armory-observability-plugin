@@ -23,10 +23,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
        if (pluginConfig.getMetrics().getPrometheus().isEnabled()) {
-           http.requestMatcher(EndpointRequest.to("aop-prometheus")).authorizeRequests((requests) ->
+           http.requestMatcher(EndpointRequest.to("x-prometheus")).authorizeRequests((requests) ->
                    requests.anyRequest().permitAll());
        } else {
-           http.requestMatcher(EndpointRequest.to("aop-prometheus")).authorizeRequests((requests) ->
+           http.requestMatcher(EndpointRequest.to("x-prometheus")).authorizeRequests((requests) ->
                    requests.anyRequest().denyAll());
        }
     }

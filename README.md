@@ -114,10 +114,10 @@ spinnaker:
                   # Optional, Default: omitted from default tags
                   customerEnvId: e0fb0422-aa8e-11ea-bb37-0242ac130002
 
-              # Creates an actuator endpoint for prometheus with id = 'aop-prometheus'
+              # Creates an actuator endpoint for prometheus with id = 'x-prometheus'
               # See the bottom of this config block
               #
-              # By default with the endpoint enabled metrics will be exposed on the service port at /aop-prometheus
+              # By default with the endpoint enabled metrics will be exposed on the service port at /x-prometheus
               #
               # See: https://gist.github.com/fieldju/7722f36451a652c399db182765046fd3 
               # for adding annotations needed for prometheus to scrape via Halyard.
@@ -234,9 +234,9 @@ management:
       percentiles[http.server.requests]: 0.95, 0.99
       percentiles-histogram[http.server.requests]: true
   endpoints.web:
-    exposure.include: health,info,aop-prometheus
+    exposure.include: health,info,x-prometheus
     # You can override the path for any actuator endpoint
-    # Optional, Default: aop-prometheus
+    # Optional, Default: x-prometheus
     path-mapping.prometheus: armory-observability/metrics
   # The port for the actuator endpoints
   # Optional, Default: the server port
